@@ -23,6 +23,7 @@ Makefile
 /build
 */Debug/
 /.qt
+/*_autogen
 
 # by IDEs and editors
 /.idea/
