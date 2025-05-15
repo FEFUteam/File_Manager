@@ -1,0 +1,31 @@
+# qt creator's rubbish 
+*.pro.user
+*.pro.user.* 
+*.qmake.stash
+*.qmake.cache
+*.qmake.conf
+*.moc
+*.obj
+*.o
+*.a
+*.so
+*.dll
+*.dylib
+
+# build files and directories
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+cmake-build-*
+CmakeLists.txt.user*
+Makefile
+/build
+*/Debug/
+/.qt
+
+# by IDEs and editors
+/.idea/
+/.vscode/
+/.settings/
+*.swp
