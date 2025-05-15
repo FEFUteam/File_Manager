@@ -30,3 +30,6 @@ Makefile
 /.vscode/
 /.settings/
 *.swp
+
+# executable
+/File_manager*
