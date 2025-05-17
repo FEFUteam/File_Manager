@@ -15,7 +15,9 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 set(PROJECT_SOURCES
         src/main.cpp
         src/mainwindow.cpp
+        src/FileOperations.cpp
         include/mainwindow.h
+        include/FileOperations.h
         src/mainwindow.ui
 )
 
