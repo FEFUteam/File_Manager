@@ -16,9 +16,11 @@ set(PROJECT_SOURCES
         src/main.cpp
         src/mainwindow.cpp
         src/FileOperations.cpp
+        src/Directory.cpp
+        src/mainwindow.ui
         include/mainwindow.h
         include/FileOperations.h
-        src/mainwindow.ui
+        include/Directory.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
