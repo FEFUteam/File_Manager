@@ -2,7 +2,7 @@
 #include <QFileInfo>
 #include <QDir>
 
-bool FileOperations::copy(const QFile &file, const QString &destPath) {
+bool FileOperations::copy(const QFile &file, QString destPath) {
     if (!file.exists()) {
         qWarning() << "FileOperations::copy(): Source file does "
                 "not exist -" << file.fileName();
@@ -15,6 +15,28 @@ bool FileOperations::copy(const QFile &file, const QString &destPath) {
         return false;
     }
 
+    qsizetype lastRelativePathPointsPos =
+        file.fileName().lastIndexOf(QString(".."), -1);
+
+    const qsizetype srcFirstExtPointPos 
+        = file.fileName().indexOf(QString("."), lastRelativePathPointsPos + 2);
+
+
+    if (srcFirstExtPointPos != -1) {
+
+        lastRelativePathPointsPos = destPath.lastIndexOf(QString(".."), -1);
+
+        const qsizetype destFirstExtPointPos
+            = destPath.indexOf(QString("."), lastRelativePathPointsPos + 2);
+
+        if (destFirstExtPointPos == -1) {
+            const QString srcExtension= file.fileName()
+                .right(file.fileName().size() - srcFirstExtPointPos); 
+
+            destPath.append(srcExtension);
+        }
+    }
+
     if (!QFile::copy(file.fileName(), destPath)) {
         qWarning() << "FileOperations::copy():" << file.errorString();
         return false;
@@ -23,7 +45,7 @@ bool FileOperations::copy(const QFile &file, const QString &destPath) {
     return true;
 }
 
-bool FileOperations::move(QFile &file, const QString &destPath) {
+bool FileOperations::move(QFile &file, QString destPath) {
 
     if (!file.exists()) {
         qWarning() << "FileOperations::move(): Source file does "
