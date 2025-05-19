@@ -8,8 +8,8 @@
 
 class FileOperations {
 public:
-    bool copy(const QFile &file, const QString &destPath);
-    bool move(QFile &file, const QString &destPath);
+    bool copy(const QFile &file, QString destPath);
+    bool move(QFile &file, QString destPath);
     bool remove(QFile &file);
     bool rename(QFile &file, const QString &newName);
     bool createSymlink(const QFile &target, const QDir &linkDir);
