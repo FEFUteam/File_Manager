@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    new Directory(ui->DirTreeView, ui->DirListView, this);
+    new Directory(ui->DirTreeView, ui->DirListView, ui->BackPush, ui->ForwardPush, ui->ListGridButton, this);
 }
 
 MainWindow::~MainWindow()

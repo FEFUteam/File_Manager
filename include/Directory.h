@@ -5,6 +5,8 @@
 #include <QListView>
 #include <QTreeView>
 #include <QWidget>
+#include <QPushButton>
+#include <QStack>
 
 
 
@@ -14,7 +16,9 @@ class Directory : public QObject{
 
 public:
 
-    Directory(QTreeView* treeView, QListView* listView, QObject *parent);
+    Directory(QTreeView* treeView, QListView* listView,
+              QPushButton* backButton, QPushButton* forwardButton,
+              QPushButton* ListGridButton, QObject *parent);
     ~Directory();
 
 
@@ -24,6 +28,10 @@ private:
 
     QTreeView *treeView = nullptr;
     QListView *listView = nullptr;
+
+    QPushButton *backButton;
+    QPushButton *forwardButton;
+    QPushButton *ListGridButton;
 
     void setup();
 };
