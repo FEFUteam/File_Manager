@@ -32,7 +32,7 @@ void Directory::setup(){
     for (int i = 1; i < folderModel->columnCount(); ++i)
         treeView->hideColumn(i);
 
-    fileModel->setFilter(QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Files | QDir::Hidden);
+    fileModel->setFilter(QDir::NoDot | QDir::AllDirs | QDir::Files | QDir::Hidden);
     fileModel->setRootPath("");
     listView->setModel(fileModel);
     listView->setRootIndex(fileModel->index(""));
@@ -75,9 +75,56 @@ void Directory::setup(){
         }
     });
 
+    listView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(listView, &QListView::customContextMenuRequested,
+            this, &Directory::showContextMenu);
+}
+
+void Directory::showContextMenu(const QPoint &pos){
+    qDebug() << "ПКМ вызван";
+    QModelIndex index = listView->indexAt(pos);
+    if (!index.isValid()) return;
+
+    QString filePath = fileModel->filePath(index);
+    QFile file(filePath);
+
+    QMenu contextMenu;
+    QAction *deleteAction = contextMenu.addAction("Delete");
+    QAction *renameAction = contextMenu.addAction("Rename");
+    QAction *copyAction   = contextMenu.addAction("Copy");
+    QAction *duplicateAction   = contextMenu.addAction("Duplicate");
+
+
+    QAction *selectedAction = contextMenu.exec(listView->viewport()->mapToGlobal(pos));
+
+    if (selectedAction == deleteAction) {
+        if (fileOps.remove(file)) {
+            QString path = fileModel->rootPath();
+            fileModel->setRootPath("");
+            fileModel->setRootPath(path);
+        }
+    } else if (selectedAction == renameAction) {
+
+
+
+    } else if (selectedAction == copyAction) {
+        lastCopiedPath = filePath;
+    } else if (selectedAction == duplicateAction) {
+        QString newName = file.fileName().left(file.fileName().indexOf('.')) + "_1";
+
+        if (fileOps.copy(file, newName)) {
+            QString path = fileModel->rootPath();
+            fileModel->setRootPath("");
+            fileModel->setRootPath(path);
+        }
+    }
 }
 
 
+QString Directory::currentPath() {
+    QModelIndex index = treeView->currentIndex();
+    return fileModel->filePath(index);
+}
 
 
 

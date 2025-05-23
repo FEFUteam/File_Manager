@@ -7,6 +7,9 @@
 #include <QWidget>
 #include <QPushButton>
 #include <QStack>
+#include <FileOperations.h>
+#include <QMenu>
+#include <QAction>
 
 
 
@@ -33,7 +36,16 @@ private:
     QPushButton *forwardButton;
     QPushButton *ListGridButton;
 
+    FileOperations fileOps;
+    QString lastCopiedPath;
+
     void setup();
+
+private slots:
+    void showContextMenu(const QPoint &pos);
+
+    QString currentPath();
+
 };
 
 #endif // DIRECTORY_H
