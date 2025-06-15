@@ -99,7 +99,20 @@
         </spacer>
        </item>
        <item>
-        <widget class="QLineEdit" name="SearchString"/>
+        <widget class="QLineEdit" name="SearchString">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="acceptDrops">
+          <bool>true</bool>
+         </property>
+         <property name="frame">
+          <bool>false</bool>
+         </property>
+         <property name="placeholderText">
+          <string/>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QPushButton" name="SearchButton">
