@@ -7,20 +7,17 @@
 #include <QWidget>
 #include <QPushButton>
 #include <QStack>
-
-
+#include <QFileInfo>
 
 class Directory : public QObject{
 
     Q_OBJECT
 
 public:
-
     Directory(QTreeView* treeView, QListView* listView,
               QPushButton* backButton, QPushButton* forwardButton,
               QPushButton* ListGridButton, QObject *parent);
     ~Directory();
-
 
 private:
     QFileSystemModel *folderModel = nullptr;
@@ -34,6 +31,8 @@ private:
     QPushButton *ListGridButton;
 
     void setup();
+    void showFileProperties(const QFileInfo &info); // Новая функция
+    void setupContextMenu();
 };
 
 #endif // DIRECTORY_H
