@@ -10,6 +10,11 @@
 #include <QMenu>
 #include <QFileInfo>
 #include <QDateTime>
+#include <QLineEdit>
+#include <QInputDialog>
+
+
+bool copyDirRecursive(const QString &sourcePath, const QString &destinationPath);
 
 QString clipboardPath;
 bool isCutOperation = false;
@@ -56,62 +61,117 @@ void Directory::setupContextMenu() {
 
     connect(listView, &QListView::customContextMenuRequested, this, [=](const QPoint &pos) {
         QModelIndex index = listView->indexAt(pos);
-        if (!index.isValid()) return;
-
-        QFileInfo info(fileModel->filePath(index));
+        QFileInfo info;
+        bool clickedOnItem = index.isValid();
 
         QMenu contextMenu;
         QAction *openAction = nullptr;
         QAction *pasteAction = nullptr;
+        QAction *renameAction = nullptr;
 
-        if (!info.isDir()) {
+        if (clickedOnItem)
+            info = QFileInfo(fileModel->filePath(index));
+
+        if (clickedOnItem && !info.isDir()) {
             openAction = contextMenu.addAction("Открыть");
         }
-        contextMenu.addAction("Копировать", [=]() {
-            clipboardPath = info.absoluteFilePath();
-            isCutOperation = false;
-        });
-        contextMenu.addAction("Вырезать", [=]() {
-            clipboardPath = info.absoluteFilePath();
-            isCutOperation = true;
-        });
-        contextMenu.addAction("Удалить", [=]() {
-            if (QMessageBox::question(nullptr, "Удалить", "Вы уверены, что хотите удалить файл?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
-                if (info.isDir()) {
-                    QDir dir(info.absoluteFilePath());
-                    dir.removeRecursively();
-                } else {
-                    QFile::remove(info.absoluteFilePath());
+
+        if (clickedOnItem) {
+            contextMenu.addAction("Копировать", [=]() {
+                clipboardPath = info.absoluteFilePath();
+                isCutOperation = false;
+            });
+
+            contextMenu.addAction("Вырезать", [=]() {
+                clipboardPath = info.absoluteFilePath();
+                isCutOperation = true;
+            });
+
+            contextMenu.addAction("Удалить", [=]() {
+                if (QMessageBox::question(nullptr, "Удалить", "Вы уверены, что хотите удалить файл?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
+                    if (info.isDir()) {
+                        QDir dir(info.absoluteFilePath());
+                        dir.removeRecursively();
+                    } else {
+                        QFile::remove(info.absoluteFilePath());
+                    }
                 }
-            }
-        });
-        if (info.isDir() && !clipboardPath.isEmpty()) {
+            });
+
+            renameAction = contextMenu.addAction("Переименовать");
+        }
+
+        if (!clipboardPath.isEmpty()) {
             pasteAction = contextMenu.addAction("Вставить");
         }
-        contextMenu.addAction("Свойства", [=]() {
-            showFileProperties(info);
-        });
+
+        if (clickedOnItem) {
+            contextMenu.addAction("Свойства", [=]() {
+                showFileProperties(info);
+            });
+            contextMenu.addAction("Дублировать", [=]() {
+                QFileInfo originalInfo = info;
+                QString baseName = originalInfo.completeBaseName();
+                QString extension = originalInfo.suffix();
+                QString dirPath = originalInfo.dir().absolutePath();
+
+                QString duplicateName;
+                QString newPath;
+                int counter = 1;
+
+                do {
+                    duplicateName = baseName + "_" + QString::number(counter);
+                    if (!extension.isEmpty() && originalInfo.isFile())
+                        duplicateName += "." + extension;
+                    newPath = dirPath + QDir::separator() + duplicateName;
+                    ++counter;
+                } while (QFileInfo::exists(newPath));
+
+                bool success = false;
+
+                if (originalInfo.isDir()) {
+                    success = copyDirRecursive(originalInfo.absoluteFilePath(), newPath);
+                } else {
+                    success = QFile::copy(originalInfo.absoluteFilePath(), newPath);
+                }
+
+                if (!success) {
+                    QMessageBox::warning(nullptr, "Ошибка", "Не удалось создать копию.");
+                }
+            });
+        }
 
         QAction *selectedAction = contextMenu.exec(listView->viewport()->mapToGlobal(pos));
 
         if (selectedAction == openAction) {
             QDesktopServices::openUrl(QUrl::fromLocalFile(info.absoluteFilePath()));
         } else if (selectedAction == pasteAction) {
-            QString destinationPath = info.absoluteFilePath() + QDir::separator() + QFileInfo(clipboardPath).fileName();
-            if (QFileInfo(clipboardPath).isDir()) {
+            // Точка вставки: либо внутрь папки, либо в текущую открытую директорию
+            QString targetDirPath;
+            if (clickedOnItem && info.isDir()) {
+                targetDirPath = info.absoluteFilePath();
+            } else {
+                targetDirPath = fileModel->filePath(listView->rootIndex());
+            }
+
+            QFileInfo srcInfo(clipboardPath);
+            QString newPath = QDir(targetDirPath).filePath(srcInfo.fileName());
+
+            if (srcInfo.isDir()) {
                 QDir sourceDir(clipboardPath);
-                QDir destDir(destinationPath);
+                QDir destDir(newPath);
                 if (!destDir.exists()) {
-                    QDir().mkpath(destinationPath);
+                    QDir().mkpath(newPath);
                 }
                 foreach (QString file, sourceDir.entryList(QDir::Files)) {
-                    QFile::copy(sourceDir.absoluteFilePath(file), destinationPath + QDir::separator() + file);
+                    QFile::copy(sourceDir.absoluteFilePath(file), newPath + QDir::separator() + file);
                 }
             } else {
-                QFile::copy(clipboardPath, destinationPath);
+                QFile::copy(clipboardPath, newPath);
             }
+
             if (isCutOperation) {
-                if (QFileInfo(clipboardPath).isDir()) {
+                if (srcInfo.isDir()) {
                     QDir dir(clipboardPath);
                     dir.removeRecursively();
                 } else {
@@ -119,10 +179,37 @@ void Directory::setupContextMenu() {
                 }
                 isCutOperation = false;
             }
+
             clipboardPath.clear();
+        } else if (selectedAction == renameAction) {
+            QString oldPath = info.absoluteFilePath();
+            QString oldName = info.fileName();
+
+            bool ok;
+            QString newName = QInputDialog::getText(nullptr, "Переименование",
+                                                    "Новое имя:", QLineEdit::Normal,
+                                                    oldName, &ok);
+
+            if (ok && !newName.isEmpty() && newName != oldName) {
+                QString newPath = info.dir().absoluteFilePath(newName);
+                bool success = false;
+
+                if (info.isDir()) {
+                    QDir dir;
+                    success = dir.rename(oldPath, newPath);
+                } else {
+                    QFile file(oldPath);
+                    success = file.rename(newPath);
+                }
+
+                if (!success) {
+                    QMessageBox::warning(nullptr, "Ошибка", "Не удалось переименовать файл.");
+                }
+            }
         }
     });
 }
+
 
 
 void Directory::setup() {
@@ -182,3 +269,32 @@ void Directory::setup() {
     setupContextMenu();
 }
 
+
+
+bool copyDirRecursive(const QString &sourcePath, const QString &destinationPath) {
+    QDir sourceDir(sourcePath);
+    if (!sourceDir.exists())
+        return false;
+
+    QDir destDir(destinationPath);
+    if (!destDir.exists()) {
+        if (!QDir().mkpath(destinationPath))
+            return false;
+    }
+
+    QFileInfoList entries = sourceDir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
+    for (const QFileInfo &entry : entries) {
+        QString srcPath = entry.absoluteFilePath();
+        QString dstPath = destinationPath + QDir::separator() + entry.fileName();
+
+        if (entry.isDir()) {
+            if (!copyDirRecursive(srcPath, dstPath))
+                return false;
+        } else {
+            if (!QFile::copy(srcPath, dstPath))
+                return false;
+        }
+    }
+
+    return true;
+}
