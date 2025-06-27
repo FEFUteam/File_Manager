@@ -22,6 +22,7 @@ private slots:
 
     void on_ListGridButton_toggled(bool checked);
 
+
 private:
     Ui::MainWindow *ui;
 };
