@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
+    findwid = new FindWidget;
     new Directory(ui->treeView, ui->listView, ui->BackPush, ui->ForwardPush, ui->ListGridButton, this);
 }
 
@@ -17,6 +17,11 @@ MainWindow::~MainWindow()
 }
 
 
+
+void MainWindow::on_SearchButton_clicked()
+{
+    findwid->show();
+}
 
 void MainWindow::on_ListGridButton_toggled(bool checked)
 {
