@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>icons/grid_active.png</file>
+        <file>icons/icons8-grid-48.png</file>
+    </qresource>
+</RCC>

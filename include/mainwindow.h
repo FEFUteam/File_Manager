@@ -16,6 +16,13 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+private slots:
+
+
+    void on_ListGridButton_toggled(bool checked);
+
+
 private:
     Ui::MainWindow *ui;
 };
