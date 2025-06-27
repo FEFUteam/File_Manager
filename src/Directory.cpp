@@ -220,7 +220,6 @@ void Directory::setup() {
     treeView->setHeaderHidden(true);
     for (int i = 1; i < folderModel->columnCount(); ++i)
         treeView->hideColumn(i);
-
     fileModel->setFilter(QDir::NoDot | QDir::AllDirs | QDir::Files | QDir::Hidden);
     fileModel->setRootPath("");
     listView->setModel(fileModel);
@@ -264,8 +263,6 @@ void Directory::setup() {
             listView->setIconSize(QSize(64, 64));
         }
     });
-
-
     setupContextMenu();
 }
 
