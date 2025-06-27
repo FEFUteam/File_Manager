@@ -134,7 +134,7 @@ void Directory::setup() {
     for (int i = 1; i < folderModel->columnCount(); ++i)
         treeView->hideColumn(i);
 
-    fileModel->setFilter(QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Files | QDir::Hidden);
+    fileModel->setFilter(QDir::NoDot | QDir::AllDirs | QDir::Files | QDir::Hidden);
     fileModel->setRootPath("");
     listView->setModel(fileModel);
     listView->setRootIndex(fileModel->index(""));
@@ -178,5 +178,7 @@ void Directory::setup() {
         }
     });
 
+
     setupContextMenu();
 }
+

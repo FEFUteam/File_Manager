@@ -8,6 +8,10 @@
 #include <QPushButton>
 #include <QStack>
 #include <QFileInfo>
+#include <FileOperations.h>
+#include <QMenu>
+#include <QAction>
+
 
 class Directory : public QObject{
 
@@ -30,9 +34,13 @@ private:
     QPushButton *forwardButton;
     QPushButton *ListGridButton;
 
+    FileOperations fileOps;
+    QString lastCopiedPath;
+
     void setup();
     void showFileProperties(const QFileInfo &info); // Новая функция
     void setupContextMenu();
+
 };
 
 #endif // DIRECTORY_H
